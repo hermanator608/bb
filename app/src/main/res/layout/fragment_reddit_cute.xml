@@ -4,11 +4,16 @@
     android:layout_height="match_parent"
     tools:context="com.brandon_h.bb.reddit.RedditCuteFragment">
 
-    <ImageView
-        android:id="@+id/cute_image"
+    <!--<ImageView-->
+        <!--android:id="@+id/cute_image"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="match_parent"-->
+        <!--android:src="@drawable/puppies"/>-->
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/rv_images"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:src="@drawable/puppies"/>
+        android:layout_height="match_parent"/>
 
     <TextView
         android:id="@+id/cute_text"

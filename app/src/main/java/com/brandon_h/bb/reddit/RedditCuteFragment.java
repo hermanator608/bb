@@ -1,36 +1,25 @@
 package com.brandon_h.bb.reddit;
 
 import android.content.Context;
-import android.net.Uri;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
-
-import com.android.volley.Request;
 import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.StringRequest;
-import com.android.volley.toolbox.Volley;
 import com.brandon_h.bb.R;
 
-import static com.brandon_h.bb.Constants.CHAT_SERVER_URL;
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
 
-/**
- * A simple {@link Fragment} subclass.
- * Activities that contain this fragment must implement the
- * {@link RedditCuteFragment.OnFragmentInteractionListener} interface
- * to handle interaction events.
- * Use the {@link RedditCuteFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
 public class RedditCuteFragment extends Fragment {
     private TextView mTextView;
-
-    private OnFragmentInteractionListener mListener;
+    private RequestQueue requestQueue;
 
     public RedditCuteFragment() {
         // Required empty public constructor
@@ -57,67 +46,77 @@ public class RedditCuteFragment extends Fragment {
         // Inflate the layout for this fragment
         View rootView = inflater.inflate(R.layout.fragment_reddit_cute, container, false);
 
-        mTextView = rootView.findViewById(R.id.cute_text);
+        RecyclerView.LayoutManager layoutManager = new GridLayoutManager(getActivity(), 2);
+        RecyclerView recyclerView = rootView.findViewById(R.id.rv_images);
+        recyclerView.setHasFixedSize(true);
+        recyclerView.setLayoutManager(layoutManager);
 
-        // Instantiate the RequestQueue.
-        RequestQueue queue = Volley.newRequestQueue(getContext());
-
-        // Request a string response from the provided URL.
-        StringRequest stringRequest = new StringRequest(Request.Method.GET, CHAT_SERVER_URL + "/reddit/aww",
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                        // Display the first 500 characters of the response string.
-                        mTextView.setText(response);
-                    }
-                }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                mTextView.setText("That didn't work!");
-            }
-        });
-        // Add the request to the RequestQueue.
-        queue.add(stringRequest);
+        ImageGalleryAdapter adapter = new ImageGalleryAdapter(getActivity(), RedditPhoto.getSpacePhotos());
+        recyclerView.setAdapter(adapter);
 
         return rootView;
     }
 
-    // TODO: Rename method, update argument and hook method into UI event
-    public void onButtonPressed(Uri uri) {
-        if (mListener != null) {
-            mListener.onFragmentInteraction(uri);
+    private class ImageGalleryAdapter extends RecyclerView.Adapter<ImageGalleryAdapter.MyViewHolder>  {
+
+        @Override
+        public ImageGalleryAdapter.MyViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+
+            Context context = parent.getContext();
+            LayoutInflater inflater = LayoutInflater.from(context);
+            View photoView = inflater.inflate(R.layout.reddit_photo, parent, false);
+            ImageGalleryAdapter.MyViewHolder viewHolder = new ImageGalleryAdapter.MyViewHolder(photoView);
+            return viewHolder;
         }
-    }
 
-//    @Override
-//    public void onAttach(Context context) {
-//        super.onAttach(context);
-//        if (context instanceof OnFragmentInteractionListener) {
-//            mListener = (OnFragmentInteractionListener) context;
-//        } else {
-//            throw new RuntimeException(context.toString()
-//                    + " must implement OnFragmentInteractionListener");
-//        }
-//    }
+        @Override
+        public void onBindViewHolder(ImageGalleryAdapter.MyViewHolder holder, int position) {
 
-    @Override
-    public void onDetach() {
-        super.onDetach();
-        mListener = null;
-    }
+            RedditPhoto spacePhoto = mSpacePhotos[position];
+            ImageView imageView = holder.mPhotoImageView;
 
-    /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     * <p>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
-     */
-    public interface OnFragmentInteractionListener {
-        // TODO: Update argument type and name
-        void onFragmentInteraction(Uri uri);
+            Glide.with(mContext)
+                    .load(spacePhoto.getUrl())
+                    .apply(new RequestOptions()
+                            .placeholder(R.drawable.ic_cloud_off_red))
+                    .into(imageView);
+        }
+
+        @Override
+        public int getItemCount() {
+            return (mSpacePhotos.length);
+        }
+
+        public class MyViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+
+            public ImageView mPhotoImageView;
+
+            public MyViewHolder(View itemView) {
+
+                super(itemView);
+                mPhotoImageView = (ImageView) itemView.findViewById(R.id.iv_photo);
+                itemView.setOnClickListener(this);
+            }
+
+            @Override
+            public void onClick(View view) {
+
+                int position = getAdapterPosition();
+                if(position != RecyclerView.NO_POSITION) {
+                    RedditPhoto spacePhoto = mSpacePhotos[position];
+                    Intent intent = new Intent(mContext, PhotoDetailActivity.class);
+                    intent.putExtra(PhotoDetailActivity.EXTRA_SPACE_PHOTO, spacePhoto);
+                    startActivity(intent);
+                }
+            }
+        }
+
+        private RedditPhoto[] mSpacePhotos;
+        private Context mContext;
+
+        public ImageGalleryAdapter(Context context, RedditPhoto[] spacePhotos) {
+            mContext = context;
+            mSpacePhotos = spacePhotos;
+        }
     }
 }
