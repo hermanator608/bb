@@ -1,13 +1,16 @@
 package com.brandon_h.bb.reddit;
 
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.graphics.Palette;
+import android.util.TypedValue;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.brandon_h.bb.R;
 import com.brandon_h.bb.space.SpacePhoto;
@@ -25,7 +28,7 @@ import com.bumptech.glide.request.target.Target;
 
 public class PhotoDetailActivity extends AppCompatActivity {
 
-    public static final String EXTRA_SPACE_PHOTO = "PhotoDetailActivity.SPACE_PHOTO";
+    public static final String EXTRA_REDDIT_PHOTO = "PhotoDetailActivity.REDDIT_PHOTO";
 
     private ImageView mImageView;
 
@@ -34,12 +37,14 @@ public class PhotoDetailActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_photo_detail);
 
-        mImageView = (ImageView) findViewById(R.id.image);
-        SpacePhoto spacePhoto = getIntent().getParcelableExtra(EXTRA_SPACE_PHOTO);
+        mImageView = findViewById(R.id.image);
+        RedditPhoto redditPhoto = getIntent().getParcelableExtra(EXTRA_REDDIT_PHOTO);
+
+        setTitle(redditPhoto.getTitle());
 
         Glide.with(this)
                 .asBitmap()
-                .load(spacePhoto.getUrl())
+                .load(redditPhoto.getUrl())
                 .apply(new RequestOptions()
                         .placeholder(R.drawable.ic_cloud_off_red))
                 .listener(new RequestListener<Bitmap>() {
@@ -59,7 +64,7 @@ public class PhotoDetailActivity extends AppCompatActivity {
                         return false;
                     }
 
-                    public void onPalette(Palette palette) {
+                    void onPalette(Palette palette) {
                         if (null != palette) {
                             ViewGroup parent = (ViewGroup) mImageView.getParent().getParent();
                             parent.setBackgroundColor(palette.getDarkVibrantColor(Color.GRAY));

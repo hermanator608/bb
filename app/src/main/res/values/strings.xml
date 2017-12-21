@@ -24,6 +24,6 @@
     <string name="user_action_typing">is typing</string>
 
     <string name="reddit_cute_fragment">Cute</string>
-
-    <string name="account_fragment">Account Info</string>
+    <string name="reddit_photo_detail">Detail</string>
+    <string name="account_fragment">Home is where the heart is!</string>
 </resources>

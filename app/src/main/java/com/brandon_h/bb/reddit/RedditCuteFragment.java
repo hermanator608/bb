@@ -12,14 +12,17 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 import com.android.volley.RequestQueue;
+import com.android.volley.toolbox.Volley;
 import com.brandon_h.bb.R;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 
+import java.util.ArrayList;
+
 public class RedditCuteFragment extends Fragment {
     private TextView mTextView;
-    private RequestQueue requestQueue;
+    public static RequestQueue requestQueue;
 
     public RedditCuteFragment() {
         // Required empty public constructor
@@ -38,6 +41,8 @@ public class RedditCuteFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        requestQueue = Volley.newRequestQueue(getContext());
     }
 
     @Override
@@ -47,12 +52,18 @@ public class RedditCuteFragment extends Fragment {
         View rootView = inflater.inflate(R.layout.fragment_reddit_cute, container, false);
 
         RecyclerView.LayoutManager layoutManager = new GridLayoutManager(getActivity(), 2);
-        RecyclerView recyclerView = rootView.findViewById(R.id.rv_images);
+        final RecyclerView recyclerView = rootView.findViewById(R.id.rv_images);
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(layoutManager);
 
-        ImageGalleryAdapter adapter = new ImageGalleryAdapter(getActivity(), RedditPhoto.getSpacePhotos());
-        recyclerView.setAdapter(adapter);
+        RedditPhoto.getSpacePhotos(new RedditPhoto.VolleyCallback() {
+            @Override
+            public void onSuccess(ArrayList<RedditPhoto> result) {
+                ImageGalleryAdapter adapter = new ImageGalleryAdapter(getActivity(), result);
+                recyclerView.setAdapter(adapter);
+            }
+        });
+
 
         return rootView;
     }
@@ -65,18 +76,17 @@ public class RedditCuteFragment extends Fragment {
             Context context = parent.getContext();
             LayoutInflater inflater = LayoutInflater.from(context);
             View photoView = inflater.inflate(R.layout.reddit_photo, parent, false);
-            ImageGalleryAdapter.MyViewHolder viewHolder = new ImageGalleryAdapter.MyViewHolder(photoView);
-            return viewHolder;
+            return new MyViewHolder(photoView);
         }
 
         @Override
         public void onBindViewHolder(ImageGalleryAdapter.MyViewHolder holder, int position) {
 
-            RedditPhoto spacePhoto = mSpacePhotos[position];
+            RedditPhoto redditPhoto = mRedditPhotos.get(position);
             ImageView imageView = holder.mPhotoImageView;
 
             Glide.with(mContext)
-                    .load(spacePhoto.getUrl())
+                    .load(redditPhoto.getUrl())
                     .apply(new RequestOptions()
                             .placeholder(R.drawable.ic_cloud_off_red))
                     .into(imageView);
@@ -84,7 +94,7 @@ public class RedditCuteFragment extends Fragment {
 
         @Override
         public int getItemCount() {
-            return (mSpacePhotos.length);
+            return (mRedditPhotos.size());
         }
 
         public class MyViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
@@ -103,20 +113,20 @@ public class RedditCuteFragment extends Fragment {
 
                 int position = getAdapterPosition();
                 if(position != RecyclerView.NO_POSITION) {
-                    RedditPhoto spacePhoto = mSpacePhotos[position];
+                    RedditPhoto redditPhoto = mRedditPhotos.get(position);
                     Intent intent = new Intent(mContext, PhotoDetailActivity.class);
-                    intent.putExtra(PhotoDetailActivity.EXTRA_SPACE_PHOTO, spacePhoto);
+                    intent.putExtra(PhotoDetailActivity.EXTRA_REDDIT_PHOTO, redditPhoto);
                     startActivity(intent);
                 }
             }
         }
 
-        private RedditPhoto[] mSpacePhotos;
+        private ArrayList<RedditPhoto> mRedditPhotos;
         private Context mContext;
 
-        public ImageGalleryAdapter(Context context, RedditPhoto[] spacePhotos) {
+        public ImageGalleryAdapter(Context context, ArrayList<RedditPhoto> redditPhotos) {
             mContext = context;
-            mSpacePhotos = spacePhotos;
+            mRedditPhotos = redditPhotos;
         }
     }
 }

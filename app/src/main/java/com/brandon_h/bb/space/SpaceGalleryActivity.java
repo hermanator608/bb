@@ -87,7 +87,7 @@ public class SpaceGalleryActivity extends AppCompatActivity {
                     SpacePhoto spacePhoto = mSpacePhotos[position];
 
                     Intent intent = new Intent(mContext, PhotoDetailActivity.class);
-                    intent.putExtra(PhotoDetailActivity.EXTRA_SPACE_PHOTO, spacePhoto);
+                    intent.putExtra(PhotoDetailActivity.EXTRA_REDDIT_PHOTO, spacePhoto);
                     startActivity(intent);
                 }
             }
